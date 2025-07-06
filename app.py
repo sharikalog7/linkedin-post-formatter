@@ -9,7 +9,6 @@ def to_bold(text, style="math"):
         "math": (0x1D400, 0x1D41A, "A", "a"),
         "fullwidth": (0xFF21, 0xFF41, "A", "a"),
     }
-
     upper_base, lower_base, upper_start, lower_start = bold_map.get(style, bold_map["math"])
     return ''.join([
         chr(upper_base + ord(c) - ord(upper_start)) if c.isupper() else
@@ -56,6 +55,20 @@ def rewrite_to_linkedin_tone(text):
 🔹 Add emojis, call-to-action, and personal voice.
 """
 
+# ✅ ADDED: Highlight-based formatting function
+def format_highlighted_words(text, bold_style="math"):
+    def apply_bold(match):
+        return to_bold(match.group(1), style=bold_style)
+    def apply_italic(match):
+        return to_italic(match.group(1))
+    def apply_underline(match):
+        return to_underline(match.group(1))
+    
+    text = re.sub(r'__([^_]+?)__', apply_underline, text)
+    text = re.sub(r'\*\*([^\*]+?)\*\*', apply_bold, text)
+    text = re.sub(r'_([^_]+?)_', apply_italic, text)
+    return text
+
 # --- LAYOUT ---
 st.title("📝 LinkedIn Formatter Tool")
 st.caption("Format your LinkedIn posts with **bold**, *italic*, _underline_, emojis, and generate LinkedIn-style rewrites.")
@@ -68,7 +81,7 @@ with left:
 
     st.markdown("### 🎨 Style Options")
     style = st.selectbox("Font Style for Bold:", ["math", "fullwidth"])
-    format_type = st.radio("Apply formatting to all text:", ["None", "Bold", "Italic", "Underline"])
+    format_type = st.radio("Apply formatting to all text:", ["Only Highlighted"])
 
     if st.button("✍️ Convert to LinkedIn Style") and input_text.strip():
         linkedin_post = rewrite_to_linkedin_tone(input_text)
@@ -82,12 +95,8 @@ with right:
         formatted = insert_emojis(input_text)
         formatted = extract_links(formatted)
 
-        if format_type == "Bold":
-            formatted = to_bold(formatted, style)
-        elif format_type == "Italic":
-            formatted = to_italic(formatted)
-        elif format_type == "Underline":
-            formatted = to_underline(formatted)
+        # ✅ Use highlight-based formatting
+        formatted = format_highlighted_words(formatted, bold_style=style)
 
         st.text_area("📋 Copy Formatted Output", value=formatted, height=300)
         st.download_button("📥 Download", formatted, file_name=f"linkedin_post_{style.lower()}.txt")
