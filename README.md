@@ -24,15 +24,12 @@ A Streamlit app to help you format LinkedIn posts with **bold**, *italic*, _unde
    cd linkedin-post-formatter
 ## Install dependencies:
 
-bash
-Copy
-Edit
+   \`\`\`bash
+
 pip install -r requirements.txt
 Run the Streamlit app:
+   \`\`\`
 
-bash
-Copy
-Edit
 streamlit run app.py
 Open the app in your browser (usually http://localhost:8501).
 
@@ -48,6 +45,7 @@ Use environment variables or secret managers in production.
 Never commit .streamlit/secrets.toml or any secret file to git history.
 
 ## Removing Secrets from Git History
+
 If you accidentally committed secrets, use the following steps to completely remove them:
 
 
@@ -58,8 +56,8 @@ If you accidentally committed secrets, use the following steps to completely rem
 
 ## Then revoke your exposed keys immediately.
 
-Contributing
+## Contributing
 Feel free to submit issues or pull requests to improve the tool!
 
-License
+## License
 MIT License © Sharika Loganathan
