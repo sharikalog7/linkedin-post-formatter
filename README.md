@@ -50,15 +50,13 @@ Never commit .streamlit/secrets.toml or any secret file to git history.
 ## Removing Secrets from Git History
 If you accidentally committed secrets, use the following steps to completely remove them:
 
-bash
-Copy
-Edit
-pip install git-filter-repo
 
-git filter-repo --path .streamlit/secrets.toml --invert-paths
+   pip install git-filter-repo
+   git filter-repo --path .streamlit/secrets.toml --invert-paths
+   git push origin main --force
 
-git push origin main --force
-Then revoke your exposed keys immediately.
+
+## Then revoke your exposed keys immediately.
 
 Contributing
 Feel free to submit issues or pull requests to improve the tool!
