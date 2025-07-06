@@ -1,9 +1,9 @@
 import streamlit as st
 import re
 
-st.set_page_config(page_title="LinkedIn Formatter", layout="centered")
+st.set_page_config(page_title="LinkedIn Formatter", layout="wide")
 
-# --- Formatters ---
+# --- FORMATTERS ---
 def to_bold(text, style="math"):
     if style == "math":
         return ''.join([chr(0x1D400 + ord(c) - 65) if c.isupper()
@@ -13,72 +13,73 @@ def to_bold(text, style="math"):
         return ''.join([chr(0xFF21 + ord(c) - 65) if c.isupper()
                         else chr(0xFF41 + ord(c) - 97) if c.islower()
                         else c for c in text])
-    else:
-        return text
+    return text
 
 def to_faux_italic(text):
-    # Simple slanted version with asterisks or soft diacritics
+    # Pseudo italic using soft diacritics (combining slash)
     return ''.join(c + '\u0357' if c.isalpha() else c for c in text)
 
 def to_underline(text):
     return ''.join(c + '\u0332' for c in text)
 
-def extract_and_linkify(text):
-    # Converts plain URLs into markdown links
+def extract_links(text):
     url_regex = r"(https?://[^\s]+)"
     return re.sub(url_regex, r"[\1](\1)", text)
 
 def insert_emojis(text):
-    # Replace :) and :fire: with emoji
     emoji_map = {
-        ":)": "😊",
-        ":(": "😔",
-        ":fire:": "🔥",
-        ":star:": "⭐",
-        ":check:": "✅",
-        ":x:": "❌"
+        ":)": "😊", ":(": "😔", ":fire:": "🔥", ":star:": "⭐", ":check:": "✅", ":x:": "❌"
     }
     for key, val in emoji_map.items():
         text = text.replace(key, val)
     return text
 
-# --- UI ---
-st.title("🔤 LinkedIn Post Formatter")
-st.caption("Bold, italic, underline, emojis, hyperlinks – all in one Unicode-safe tool for LinkedIn.")
+def rewrite_to_linkedin_tone(text):
+    return f"""🚀 Here's how I'd rewrite this in a LinkedIn-friendly tone:
 
-input_text = st.text_area("📋 Paste your LinkedIn post below:", height=180)
+🔹 {text.capitalize().strip()}
+🔹 Focused on value, clarity, and professional tone.
+🔹 Add emojis, call-to-action, and personal voice.
+"""
 
-# Formatting controls
-format_option = st.radio("✨ Choose formatting style:", ("Bold", "Italic", "Underline", "None"))
+# --- LAYOUT ---
+st.title("📝 LinkedIn Formatter Tool")
+st.caption("Format your LinkedIn posts with **bold**, *italic*, _underline_, emojis, and generate LinkedIn-style rewrites.")
 
-bold_style = None
-if format_option == "Bold":
-    bold_style = st.selectbox("🅱️ Choose bold style:", ("math", "fullwidth"))
+left, right = st.columns([2, 2])
 
-# Live processing
-formatted = input_text
-if formatted:
-    formatted = insert_emojis(formatted)
-    formatted = extract_and_linkify(formatted)
+with left:
+    st.markdown("### ✍️ Paste Your Post")
+    input_text = st.text_area("Paste your LinkedIn post here:", height=300)
 
-    if format_option == "Bold":
-        formatted = to_bold(formatted, bold_style)
-    elif format_option == "Italic":
-        formatted = to_faux_italic(formatted)
-    elif format_option == "Underline":
-        formatted = to_underline(formatted)
+    st.markdown("### 🎨 Style Options")
+    style = st.selectbox("Font Style for Bold:", ["math", "fullwidth"])
+    format_type = st.radio("Apply formatting to all text:", ["None", "Bold", "Italic", "Underline"])
 
-# Display Output
-if formatted.strip():
-    st.markdown("### ✅ Formatted Output")
-    st.code(formatted, language="markdown")
+    # Post transformation
+    if st.button("✍️ Convert to LinkedIn Style"):
+        linkedin_post = rewrite_to_linkedin_tone(input_text)
+    else:
+        linkedin_post = None
 
-    st.download_button("📥 Download Formatted Text", formatted, file_name="linkedin_formatted.txt")
+with right:
+    st.markdown("### 👀 Formatted Preview")
+    if input_text:
+        formatted = insert_emojis(input_text)
+        formatted = extract_links(formatted)
 
-    st.markdown("### 👀 Realistic Preview")
-    st.markdown(formatted)
+        if format_type == "Bold":
+            formatted = to_bold(formatted, style)
+        elif format_type == "Italic":
+            formatted = to_faux_italic(formatted)
+        elif format_type == "Underline":
+            formatted = to_underline(formatted)
 
-st.markdown("---")
-st.markdown("✅ Use our free **LinkedIn Text Formatter** to easily format your posts with **bold**, *italic*, __underline__, emojis, and [hyperlinks](https://linkedin.com).")
+        st.code(formatted, language="markdown")
+        st.download_button("📥 Download", formatted, file_name="linkedin_formatted.txt")
+        st.text_area("📋 Copy Formatted Output", formatted, height=300)
 
-
+        if linkedin_post:
+            st.markdown("---")
+            st.markdown("### 🤖 LinkedIn Style Rewrite")
+            st.markdown(linkedin_post)
